@@ -55,9 +55,9 @@
 
             <td th:text="${employee.salary}"></td>
             
-	    <td><a th:href="@{/edit/{id}(id=${employee.id})}" class="btn btn-warning btn-sm">Edit</a></td>
-	    <td>  <a th:href="@{/delete/{id}(id=${employee.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this employee?')">Delete</a></td>
-
+	    <td><a th:href="@{/edit/{id}(id=${employee.id})}" class="btn btn-warning btn-sm">Edit</a>
+	     <a th:href="@{/delete/{id}(id=${employee.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this employee?')">Delete</a>
+             </td>
         </tr>
 
         </tbody>
