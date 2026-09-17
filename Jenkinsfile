@@ -76,11 +76,45 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                sh '''
-                    kubectl rollout status deployment/${DEPLOYMENT} \
-                    -n ${NAMESPACE} \
-                    --timeout=180s
-                '''
+                script {
+
+                    try {
+
+                        echo "Checking Kubernetes rollout..."
+
+                        sh '''
+                            kubectl rollout status deployment/${DEPLOYMENT} \
+                            -n ${NAMESPACE} \
+                            --timeout=180s
+                        '''
+
+                        echo "Deployment rollout successful!"
+
+                    } catch (Exception e) {
+
+                        echo "======================================"
+                        echo "DEPLOYMENT FAILED"
+                        echo "Starting automatic rollback..."
+                        echo "======================================"
+
+                        sh '''
+                            kubectl rollout undo deployment/${DEPLOYMENT} \
+                            -n ${NAMESPACE}
+                        '''
+
+                        echo "Rollback command executed."
+
+                        sh '''
+                            kubectl rollout status deployment/${DEPLOYMENT} \
+                            -n ${NAMESPACE} \
+                            --timeout=180s
+                        '''
+
+                        echo "Rollback completed successfully."
+
+                        throw e
+                    }
+                }
             }
         }
     }
@@ -88,11 +122,15 @@ pipeline {
     post {
 
         success {
+            echo "======================================"
             echo "Deployment Successful!"
+            echo "======================================"
         }
 
         failure {
+            echo "======================================"
             echo "Pipeline Failed!"
+            echo "======================================"
         }
     }
 }
