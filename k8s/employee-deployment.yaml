@@ -13,6 +13,12 @@ spec:
     matchLabels:
       app: employee-app
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
   template:
 
     metadata:
@@ -27,8 +33,11 @@ spec:
 
           image: ashugedekar/employee-app:6
 
+          imagePullPolicy: IfNotPresent
+
           ports:
             - containerPort: 8081
+              protocol: TCP
 
           env:
 
@@ -49,3 +58,29 @@ spec:
                 secretKeyRef:
                   name: employee-secret
                   key: SPRING_DATASOURCE_PASSWORD
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            failureThreshold: 30
+            periodSeconds: 10
+            timeoutSeconds: 2
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8081
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
