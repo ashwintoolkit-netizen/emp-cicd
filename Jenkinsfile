@@ -54,7 +54,17 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Apply Kubernetes Manifest') {
+            steps {
+                sh '''
+                    kubectl apply \
+                    -f k8s/employee-deployment.yaml \
+                    -n ${NAMESPACE}
+                '''
+            }
+        }
+
+        stage('Deploy New Image') {
             steps {
                 sh '''
                     kubectl set image deployment/${DEPLOYMENT} \
@@ -69,7 +79,7 @@ pipeline {
                 sh '''
                     kubectl rollout status deployment/${DEPLOYMENT} \
                     -n ${NAMESPACE} \
-                    --timeout=120s
+                    --timeout=180s
                 '''
             }
         }
